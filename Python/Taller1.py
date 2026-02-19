@@ -145,3 +145,5 @@ fuerza_retroceso = presion * (area_piston - area_vastago)
 
 print("Fuerza de avance:", fuerza_avance, "N")
 print("Fuerza de retroceso:", fuerza_retroceso, "N")
+
+##holiss
