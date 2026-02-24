@@ -21,7 +21,7 @@ elif x==2:
 elif x==3:
     print("\n")
     print(" Escojiste el robot Esferico:")
-    print("\n Es un robot con utiliza una configuración cinemática RRP")
+    print("\n Es un robot que utiliza una configuración cinemática RRP")
     print("\n El cual cuenta 3 articulaciones")
     print("\n")
 else:
