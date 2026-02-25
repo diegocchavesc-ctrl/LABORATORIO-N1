@@ -1,7 +1,0 @@
-# Ejercicio 1
-corriente = float(input ("Ingrese la corriente del circuito en A: "))
-voltaje = float(input ("Ingrese la tension del circuito en V: "))
-
-
-potencia = corriente * voltaje
-print(f"La potencia del circuito es: {potencia} W")
