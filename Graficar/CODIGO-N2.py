@@ -2,33 +2,45 @@ import numpy as np
 import matplotlib.pyplot as plt
 import control as ctrl
 
-a = float(input("Coef de s^2: "))
-b = float(input("Coef de s: "))
-c = float(input("Termino indep: "))
-k = float(input("Ganancia K: "))
+print("--- Análisis de Sistema de Segundo Orden ---")
 
-# Calculos z
-w = np.sqrt(c/a)
-z = (b/a) / (2 * w)
+# 1. Entrada de datos (según la fórmula G(s) de la imagen)
+k = float(input("Ingrese la ganancia (K): "))
+wn = float(input("Ingrese la frecuencia natural (wn): "))
+zeta = float(input("Ingrese el factor de amortiguamiento (zeta): "))
 
-# Clasificación
-if z < 1:
+# 2. Definición de la función de transferencia
+# Numerador: K * wn^2
+# Denominador: s^2 + 2*zeta*wn*s + wn^2
+num = [k * (wn**2)]
+den = [1, 2 * zeta * wn, wn**2]
+
+sistema = ctrl.TransferFunction(num, den)
+
+# 3. Lógica para determinar el tipo de sistema
+if 0 < zeta < 1:
     tipo = "Subamortiguado"
-elif z == 1:
+elif zeta == 1:
     tipo = "Criticamente amortiguado"
-else:
+elif zeta > 1:
     tipo = "Sobreamortiguado"
+elif zeta == 0:
+    tipo = "Oscilatorio (Sin amortiguamiento)"
+else:
+    tipo = "Inestable"
 
-print(f"\nZeta: {round(z, 3)}")
-print(f"Sistema: {tipo}")
+print(f"\nResultado: El sistema es {tipo}")
 
-# Grafica
-tf = ctrl.TransferFunction([k], [a, b, c])
-t, y = ctrl.step_response(tf)
+# 4. Cálculo de la respuesta temporal (Escalón)
+tiempo, respuesta = ctrl.step_response(sistema)
 
-plt.plot(t, y)
-plt.title("Respuesta sistema")
-plt.xlabel("t")
-plt.ylabel("y(t)")
+# 5. Graficación
+
+plt.figure(figsize=(8, 5))
+plt.plot(tiempo, respuesta, 'r-', linewidth=1.5, label=f'zeta = {zeta}')
+plt.title(f'Respuesta al Escalón ({tipo})')
+plt.xlabel('Tiempo [s]')
+plt.ylabel('Amplitud')
 plt.grid(True)
+plt.legend()
 plt.show()

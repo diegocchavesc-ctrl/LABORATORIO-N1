@@ -1,7 +1,7 @@
 import cv2
 import matplotlib.pyplot as plt
 
-img1 = cv2.imread(r"C:\Users\centrodesoluciones\Downloads\Robotica\Graficar\chevrolet.jpg")
+img1 = cv2.imread(r"C:\Users\centrodesoluciones\Downloads\Robotica\Graficar\chevrolet.png")
 gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
 canon1 = cv2.Canny(gray1, 100, 200)
 contornos1, _ = cv2.findContours(canon1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
