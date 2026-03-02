@@ -1,35 +1,58 @@
 import cv2
 import matplotlib.pyplot as plt
+import numpy as np
 
-img1 = cv2.imread(r"C:\Users\centrodesoluciones\Downloads\Robotica\Graficar\chevrolet.png")
-gray1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
-canon1 = cv2.Canny(gray1, 100, 200)
-contornos1, _ = cv2.findContours(canon1, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-cnt1 = max(contornos1, key=cv2.contourArea)
+archivos = [
+    (r"C:\Users\User\Downloads\chevrolet.png", 0.01, "Chevrolet"),
+    (r"C:\Users\User\Downloads\mitsubishi.png", 0.02, "Mitsubishi")
+]
 
-x1 = cnt1[:,0,0]
-y1 = cnt1[:,0,1]
+def obtener_puntos(path, sens):
+    img = cv2.imread(path)
+    if img is None:
+        print("No se pudo abrir:", path)
+        return None, None    
+    # Preprocesado rapido
+    gris = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    suave = cv2.GaussianBlur(gris, (5, 5), 0)
+    # Umbral para separar el logo del fondo
+    _, binaria = cv2.threshold(suave, 200, 255, cv2.THRESH_BINARY_INV)
+    # Buscar contornos y quedarnos con el mas grande
+    contornos, _ = cv2.findContours(binaria, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if not contornos:
+        return None, None
+    
+    grande = max(contornos, key=cv2.contourArea)
+    
+    # Simplificar el contorno para sacar solo las esquinas (Douglas-Peucker)
+    eps = sens * cv2.arcLength(grande, True)
+    puntos = cv2.approxPolyDP(grande, eps, True)
+    # Limpiar dimensiones y voltear eje Y para que coincida con la imagen
+    px = puntos[:, 0, 0]
+    py = img.shape[0] - puntos[:, 0, 1]
+    return px, py
 
-img2 = cv2.imread(r"C:\Users\centrodesoluciones\Downloads\Robotica\Graficar\mitsubishi.png")
-gray2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
-canon2 = cv2.Canny(gray2, 100, 200)
-contornos2, _ = cv2.findContours(canon2, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-cnt2 = max(contornos2, key=cv2.contourArea)
-
-x2 = cnt2[:,0,0] - 500
-y2 = cnt2[:,0,1]
-
-plt.plot(x1, y1, 'k', linewidth=2) 
-plt.plot(x2, y2, 'r', linewidth=2) 
-
-for i in range(0, len(x1), 200):
-    plt.text(x1[i], y1[i], f"({x1[i]},{y1[i]})", fontsize=6)
-
-for i in range(0, len(x2), 200):
-    plt.text(x2[i], y2[i], f"({x2[i]},{y2[i]})", fontsize=6)
-
-plt.axis("equal")
-plt.ylim(max(max(y1), max(y2)), 0) 
-plt.grid()
-plt.title("Logos extraidos")
-plt.show()
+# --- PROCESAR Y MOSTRAR ---
+for ruta, precision, nombre in archivos:
+    x, y = obtener_puntos(ruta, precision)
+    if x is not None:
+        plt.figure(figsize=(9, 6))
+        
+        # Cerrar el poligono para que la linea de plt no quede abierta
+        plt.plot(np.append(x, x[0]), np.append(y, y[0]), 'g-', linewidth=1.5)
+        plt.scatter(x, y, color='black', s=25)
+        
+        # Formatear el texto lateral de coordenadas
+        lista_coords = "\n".join([f"P{i}: ({x[i]}, {y[i]})" for i in range(len(x))])
+        
+        plt.text(1.05, 0.5, f"Coordenadas:\n{lista_coords}", 
+                 transform=plt.gca().transAxes, fontsize=8,
+                 bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.3),
+                 verticalalignment='center')
+        
+        plt.title(f"Analisis de Vértices - {nombre}")
+        plt.axis("equal")
+        plt.grid(True, alpha=0.3)
+        plt.legend(loc='upper right')
+        plt.tight_layout()
+        plt.show()
