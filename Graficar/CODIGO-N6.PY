@@ -20,14 +20,11 @@ def obtener_puntos(path, sens):
     # Buscar contornos y quedarnos con el mas grande
     contornos, _ = cv2.findContours(binaria, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     if not contornos:
-        return None, None
-    
+        return None, None    
     grande = max(contornos, key=cv2.contourArea)
-    
-    # Simplificar el contorno para sacar solo las esquinas (Douglas-Peucker)
+    # Simplificar el contorno para sacar solo las esquinas 
     eps = sens * cv2.arcLength(grande, True)
     puntos = cv2.approxPolyDP(grande, eps, True)
-    # Limpiar dimensiones y voltear eje Y para que coincida con la imagen
     px = puntos[:, 0, 0]
     py = img.shape[0] - puntos[:, 0, 1]
     return px, py
@@ -44,12 +41,10 @@ for ruta, precision, nombre in archivos:
         
         # Formatear el texto lateral de coordenadas
         lista_coords = "\n".join([f"P{i}: ({x[i]}, {y[i]})" for i in range(len(x))])
-        
         plt.text(1.05, 0.5, f"Coordenadas:\n{lista_coords}", 
                  transform=plt.gca().transAxes, fontsize=8,
                  bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.3),
                  verticalalignment='center')
-        
         plt.title(f"Analisis de Vértices - {nombre}")
         plt.axis("equal")
         plt.grid(True, alpha=0.3)
